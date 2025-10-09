@@ -1,80 +1,103 @@
-# 🤖 BOT de Monitoramento de Componente Geral - INVESTSUS
+# 🤖 BOT de Monitoramento: Dados de Crédito INVESTSUS
 
-Este projeto é um *script* Python, implementado em um Jupyter Notebook, que automatiza o *download*, tratamento e consolidação de dados de **Crédito Financeiro** e **Modalidade 1** do painel INVESTSUS (do Ministério da Saúde do Brasil). O objetivo é gerar um arquivo Excel final (`.xlsx`) atualizado para monitoramento e análise.
+Este projeto é um *script* Python (implementado em um Jupyter Notebook) focado na **automação** e **consolidação** de dados do painel INVESTSUS (Ministério da Saúde do Brasil). O bot automatiza o *download*, o tratamento e a estruturação de dados de **Crédito Financeiro** e **Modalidade 1** para gerar um arquivo Excel (`.xlsx`) pronto para análise.
 
-## 🎯 Objetivo
+-----
 
-Automatizar o processo de coleta, limpeza e estruturação dos dados de propostas de Crédito Financeiro e Modalidade 1 do Painel INVESTSUS, aplicando correções manuais de status de propostas (Aprovado/Cancelado) e gerando um arquivo Excel consolidado em um formato padronizado (`MODELO`).
+## 🎯 Funcionalidade Principal
 
-## ⚙️ Pré-requisitos
+O objetivo é eliminar o trabalho manual de coleta, limpeza e estruturação, garantindo que o monitoramento seja feito sobre uma base de dados unificada e padronizada.
 
-Para executar este *script* com sucesso, você precisará dos seguintes softwares e bibliotecas:
+O script executa as seguintes tarefas:
 
-1.  **Python 3.x**
-2.  **Microsoft Edge:** O *script* utiliza o Selenium para automação do navegador Edge.
-3.  **`msedgedriver.exe`:** O executável do *driver* do Edge, compatível com a sua versão do navegador, deve estar localizado na pasta `web` (i.e., `web/msedgedriver.exe`).
-4.  **Bibliotecas Python:**
-    ```bash
-    pip install pandas openpyxl selenium
-    ```
-5.  **Estrutura de Pastas:** O projeto deve estar organizado com as seguintes pastas:
-      * `downloads/`: Onde os arquivos `.xlsx` baixados serão salvos.
-      * `model/`: Onde o arquivo **`MONITORAMENTO DE COMPONENTE.xlsx`** (o *template* de saída) deve estar localizado.
-      * `saida/`: Onde o arquivo Excel final e datado será gerado.
-      * `web/`: Onde o `msedgedriver.exe` deve estar.
+  * **Coleta Automática:** Acessa o painel INVESTSUS via automação web (Selenium).
+  * **Tratamento de Dados:** Aplica rotinas de limpeza, cálculos e correções manuais de status de propostas (Aprovado/Cancelado).
+  * **Consolidação:** Gera um arquivo Excel final, seguindo o *template* `MODELO`, pronto para monitoramento.
 
-## 🚀 Como Executar o Script
+-----
 
-1.  **Clone o Repositório:**
-    ```bash
-    git clone https://www.dio.me/articles/enviando-seu-projeto-para-o-github
-    cd [pasta do repositório]
-    ```
-2.  **Verifique os Pré-requisitos:** Certifique-se de que todas as bibliotecas estão instaladas e as pastas `web/` e `model/` (com o arquivo modelo) existem.
-3.  **Execute o Notebook:**
-    Abra o arquivo `credito_modalidade.ipynb` e execute todas as células em sequência. O *script* irá:
-      * Iniciar o navegador Edge.
-      * Acessar o painel INVESTSUS.
-      * Baixar os 6 arquivos (`aba1`, `aba2`, `aba3`) das abas **"Crédito Financeiro"** e **"Modalidade 1"**.
-      * Realizar o tratamento dos dados (limpeza, cálculo, alteração de status).
-      * Consolidar os DataFrames no arquivo Excel modelo e salvá-lo na pasta `saida/`.
+## ⚙️ Pré-requisitos Técnicos
 
-## 📦 Estrutura do Script (Notebook)
+Para rodar o projeto, certifique-se de ter instalado o seguinte:
 
-O *script* está dividido em três partes principais:
+### 1\. Ambiente
 
-### 1\. PRIMEIRA PARTE - Downloads Manual dos Arquivos do INVESTSUS
+  * **Python 3.x**
+  * **Microsoft Edge:** O script utiliza o Selenium para automação.
+  * **`msedgedriver.exe`:** O **driver do Edge** (compatível com sua versão do navegador) deve ser colocado na pasta **`web/`** (ex: `web/msedgedriver.exe`).
 
-Esta seção utiliza a biblioteca **Selenium** para automação do navegador Edge.
+### 2\. Dependências Python
 
-  * **Configuração:** Define o diretório de *downloads* (`downloads/`) e inicializa o `webdriver`.
-  * **Acesso e Navegação:** Acessa a URL do painel INVESTSUS.
-  * **Rotina de Download:** Define a função `baixar_e_renomear` que clica nos botões de download, lida com alertas e renomeia o arquivo baixado para um nome padronizado (ex: `credito_financeiro_aba1.xlsx`).
-  * **Execução:** Realiza o download de 3 arquivos para a aba **"Crédito Financeiro"** e 3 para a aba **"Modalidade 1"**.
+Instale as bibliotecas necessárias usando o `pip`. Se houver um arquivo `requirements.txt` no repositório, use o comando:
 
-### 2\. SEGUNDA PARTE, Realizar Tratamento dos Dados
+```bash
+pip install -r requirements.txt
+# Ou, instale manualmente:
+# pip install pandas openpyxl selenium
+```
 
-Esta seção carrega e manipula os dados usando a biblioteca **Pandas**.
+### 3\. Estrutura de Diretórios
 
-  * **Carregamento:** Carrega os 6 arquivos Excel baixados em DataFrames separados (`df_cf_aba1`, `df_m1_aba3`, etc.).
-  * **Tratamento de Status:** Aplica correções manuais de status em propostas específicas:
-      * Marca propostas em `propostas_aprovada` como **'Aprovado'**.
-      * Marca propostas em `propostas_canceladas` como **'Cancelado'**.
-  * **Criação da Matriz de Oferta (M\_OFERTA):**
-      * Cria e estrutura os DataFrames de Matriz de Oferta (Cirurgias - `_CC` e OCI - `_OCI`) para ambas as modalidades (`df_cf_aba3`, `df_m1_aba3`, `df_cf_aba2`, `df_m1_aba2`).
-      * Calcula a coluna `VALOR_TOTAL_MES` (quantidade mensal \* valor máximo/procedimento).
-      * Reorganiza a ordem e renomeia colunas.
-  * **Criação da Aba Simplificada (SIMP):**
-      * Cria os DataFrames simplificados (`df_simp_cc`, `df_simp_m1`) com base nas abas `aba1`.
-      * Faz o *merge* dos valores totais calculados (soma de `VALOR_TOTAL_MES` para Cirurgia e OCI) para cada Proposta de Referência.
-      * Calcula as colunas `VALOR_TOTAL_MES_COMP+OCI` e `VALOR_TOTAL_ANO_COMP+OCI`.
+As seguintes pastas são essenciais e devem existir no diretório raiz do projeto:
 
-### 3\. TERCEIRA PARTE, Carregar os DataFrames para a Tabela MODELO
+| Pasta | Conteúdo Esperado |
+| :--- | :--- |
+| **`downloads/`** | Onde os arquivos `.xlsx` baixados serão temporariamente salvos. |
+| **`model/`** | Onde deve estar o arquivo *template* (modelo) de saída: **`MONITORAMENTO DE COMPONENTE.xlsx`**. |
+| **`saida/`** | Onde o arquivo Excel final e datado será gerado. |
+| **`web/`** | Onde o executável **`msedgedriver.exe`** deve ser colocado. |
 
-Esta seção usa a biblioteca **OpenPyXL** para inserir os dados tratados no arquivo modelo Excel.
+-----
 
-  * **Mapeamento:** Define o mapeamento entre os DataFrames tratados e as abas específicas do arquivo modelo (`MAPPING`).
-  * **Sobrescrita de Abas:** A função `sobrescrever_aba` carrega o arquivo `MONITORAMENTO DE COMPONENTE.xlsx` e insere os dados de cada DataFrame a partir da **linha 3** de suas abas correspondentes (mantendo o cabeçalho original do modelo).
-  * **Atualização de Metadados:** Atualiza a aba **`INFO`** com a data/hora da execução e a sigla "BR".
-  * **Saída:** Salva o resultado final com um nome datado (ex: `saida/20251009_MONITORAMENTO DE COMPONENTE.xlsx`), garantindo que o modelo original permaneça intacto.
+## 🚀 Guia de Execução Rápida
 
+Siga estes passos para rodar o bot de monitoramento:
+
+### 1\. Clonagem do Repositório
+
+Use o Git para baixar o código e entrar no diretório do projeto:
+
+```bash
+git clone https://github.com/otavioaugust1/BOT_MONITORAMENTO_COMPONETE_GERAL
+cd BOT_MONITORAMENTO_COMPONETE_GERAL
+```
+
+### 2\. Configuração e Dependências
+
+Certifique-se de que a estrutura de pastas e o `msedgedriver.exe` (na pasta `web/`) estão configurados e que as dependências Python foram instaladas (conforme a seção Pré-requisitos).
+
+### 3\. Execução
+
+O processo é totalmente gerenciado pelo Jupyter Notebook:
+
+1.  Abra o arquivo **`credito_modalidade.ipynb`**.
+2.  **Execute todas as células em sequência.**
+
+O script fará o restante, desde o acesso ao INVESTSUS até o salvamento do arquivo final datado na pasta **`saida/`**.
+
+-----
+
+## 💡 Detalhamento do Script (`credito_modalidade.ipynb`)
+
+O Notebook está logicamente dividido em três seções principais, que refletem o fluxo de trabalho do bot:
+
+### 1\. PARTE 1: Automação e Downloads (Selenium)
+
+Esta seção configura e utiliza a biblioteca **Selenium** para a interação web.
+
+  * **Coleta de Dados:** Acessa o painel INVESTSUS e executa a rotina de *download* para um total de **6 arquivos** (3 de "Crédito Financeiro" e 3 de "Modalidade 1"), renomeando-os e salvando-os na pasta `downloads/`.
+
+### 2\. PARTE 2: Tratamento e Estruturação (Pandas)
+
+O foco aqui é carregar e manipular os dados usando o **Pandas**.
+
+  * **Correção de Status:** Aplica regras de negócio para forçar o status de propostas específicas para **'Aprovado'** ou **'Cancelado'**.
+  * **Criação de Matrizes:** Calcula e estrutura as matrizes de Oferta, calculando o `VALOR_TOTAL_MES`.
+  * **Consolidação Simplificada:** Cria as abas de resumo simplificado (`SIMP`), consolidando os valores calculados de Cirurgia e OCI para criar as colunas de valor total.
+
+### 3\. PARTE 3: Geração da Saída (OpenPyXL)
+
+Utiliza a biblioteca **OpenPyXL** para inserir os dados tratados no *template* Excel.
+
+  * **Sobrescrita:** Carrega o modelo (`MONITORAMENTO DE COMPONENTE.xlsx`) e insere os dados de cada DataFrame **a partir da linha 3** de suas abas correspondentes (preservando o cabeçalho original).
+  * **Saída Final:** Salva o arquivo final com um nome datado (ex: `saida/YYYYMMDD_MONITORAMENTO DE COMPONENTE.xlsx`), garantindo que o modelo original nunca seja sobrescrito.
