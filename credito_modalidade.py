@@ -201,7 +201,7 @@ try:
     print("-----------------------------------------------------------------")
 
     # --------------------------------------------------------------------------
-    # Tratamento para string os numeros das proposta da modalidade 1 (abas 1,2,3) 
+    # Tratamento para string em numeros das proposta da modalidade 1 (abas 1,2,3) 
     # --------------------------------------------------------------------------
     print("🛠 Tratamento para string os numeros das proposta da modalidade 1 (abas 1,2,3)")
     for i, df in enumerate([df_m1_aba1, df_m1_aba2, df_m1_aba3], start=1):

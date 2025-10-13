@@ -87,3 +87,7 @@ docs/_templates/
 .coverage
 htmlcov/
 .pytest_cache/
+
+### Arquivos de saide ###
+downloads/*
+saida/*
