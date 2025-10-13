@@ -77,7 +77,7 @@ if driver:
 
             # Aguarda o download finalizar
             # ATENÇÃO: Este tempo pode precisar de ajuste dependendo do tamanho do arquivo
-            time.sleep(10)
+            time.sleep(5)
 
             # Renomeia o arquivo mais recente .xlsx
             arquivos_xlsx = [os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR) if f.endswith(".xlsx")]
@@ -199,6 +199,14 @@ try:
         canceladas = df[df['Proposta de Referência'].isin(propostas_canceladas)]
         print(f"✅ df_cf_aba{i}: {len(canceladas)} propostas marcadas como 'Cancelado'.")
     print("-----------------------------------------------------------------")
+
+    # --------------------------------------------------------------------------
+    # Tratamento para string os numeros das proposta da modalidade 1 (abas 1,2,3) 
+    # --------------------------------------------------------------------------
+    print("🛠 Tratamento para string os numeros das proposta da modalidade 1 (abas 1,2,3)")
+    for i, df in enumerate([df_m1_aba1, df_m1_aba2, df_m1_aba3], start=1):
+    # Garante que a coluna esteja no tipo string
+        df['Proposta de Referência'] = df['Proposta de Referência'].astype(str)
 
 
     # --------------------------------------------------------------------------
