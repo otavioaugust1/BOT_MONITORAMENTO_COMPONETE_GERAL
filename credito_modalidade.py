@@ -188,6 +188,7 @@ try:
         2870053000022025503,    # SC-SOMBRIO
         4605648700012025501,    # SP-VALINHOS
         24712500022025504,      # RJ-NITEROI
+        353343200012025502,     # CAMPO GRANDE
     ]
     propostas_canceladas = [str(p) for p in propostas_canceladas]
 
@@ -207,7 +208,6 @@ try:
     for i, df in enumerate([df_m1_aba1, df_m1_aba2, df_m1_aba3], start=1):
     # Garante que a coluna esteja no tipo string
         df['Proposta de Referência'] = df['Proposta de Referência'].astype(str)
-
 
     # --------------------------------------------------------------------------
     # Tratamento MATRIZ DE OFERTA - CRÉDITO FINANCEIRO - CIRURGIAS (df_cf_aba3)
