@@ -75,7 +75,7 @@ docs/_templates/
 
 ### Arquivos específicos do projeto ###
 # Remova os comentários abaixo se necessário
-enviar_relatorio.py
+#enviar_relatorio.py
 *.jpg
 
 ### Arquivos Jupyter Notebook ###
