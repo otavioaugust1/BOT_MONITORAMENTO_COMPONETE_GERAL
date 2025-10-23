@@ -101,3 +101,6 @@ Utiliza a biblioteca **OpenPyXL** para inserir os dados tratados no *template* E
 
   * **Sobrescrita:** Carrega o modelo (`MONITORAMENTO DE COMPONENTE.xlsx`) e insere os dados de cada DataFrame **a partir da linha 3** de suas abas correspondentes (preservando o cabeçalho original).
   * **Saída Final:** Salva o arquivo final com um nome datado (ex: `saida/YYYYMMDD_MONITORAMENTO DE COMPONENTE.xlsx`), garantindo que o modelo original nunca seja sobrescrito.
+
+-------
+VERSÃO 2.0 -> foi alterado informação do painel
