@@ -2,6 +2,12 @@
 
 Este projeto é um *script* Python (implementado em um Jupyter Notebook) focado na **automação** e **consolidação** de dados do painel INVESTSUS (Ministério da Saúde do Brasil). O bot automatiza o *download*, o tratamento e a estruturação de dados de **Crédito Financeiro** e **Modalidade 1** para gerar um arquivo Excel (`.xlsx`) pronto para análise.
 
+### NOVIDADES:
+
+- ✅ Correção do script para adaptar ao novo layout do site e ao novo formato dos arquivos disponibilizados pelo painel INVESTSUS.
+- 🛠️ Ajuste na aba `M_OFERTA_M1_CC`, que anteriormente trazia dados incorretos da aba `M_OFERTA_CF_CC`.
+- 🏥 Inclusão da informação de **CNES** para unidades que antes possuíam apenas **CNPJ**, ampliando a precisão dos dados consolidados.
+
 -----
 
 ## 🎯 Funcionalidade Principal
@@ -103,4 +109,4 @@ Utiliza a biblioteca **OpenPyXL** para inserir os dados tratados no *template* E
   * **Saída Final:** Salva o arquivo final com um nome datado (ex: `saida/YYYYMMDD_MONITORAMENTO DE COMPONENTE.xlsx`), garantindo que o modelo original nunca seja sobrescrito.
 
 -------
-VERSÃO 2.0 -> foi alterado informação do painel
+VERSÃO 2.1 -> foi alterado informação do painel

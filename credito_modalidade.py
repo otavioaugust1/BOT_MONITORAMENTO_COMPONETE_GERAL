@@ -1,7 +1,7 @@
-# ==================================================================
-# PRIMEIRA PARTE - downloads manual dos arquivos do INVESTSUS
-# ==================================================================
+# %% [markdown]
+# # PRIMEIRA PARTE - downloads manual dos arquivos do INVESTSUS
 
+# %%
 # 📚 BIBLIOTECAS
 import os
 import time
@@ -116,9 +116,13 @@ baixar_e_renomear('//*[@id="QV4-04gvqxmPC"]', "modalidade_1_aba3.xlsx")
 driver.quit()
 
 
-# SEGUNDA PARTE, REALIZAR TRATAMENTO DOS DADOS.
+# %% [markdown]
+# # SEGUNDA PARTE, REALIZAR TRATAMENTO DOS DADOS.
+
+# %%
 
 import pandas as pd
+import numpy as np
 # Ajusta a opção de exibição para mostrar todas as colunas
 pd.set_option('display.max_columns', None)
 
@@ -133,6 +137,8 @@ df_m1_aba1 = pd.read_excel("downloads/modalidade_1_aba1.xlsx")
 df_m1_aba2 = pd.read_excel("downloads/modalidade_1_aba2.xlsx")
 df_m1_aba3 = pd.read_excel("downloads/modalidade_1_aba3.xlsx")
 
+
+# %%
 # Lista de propostas a aprovar
 propostas_aprovada = [
     781831300012025501   # APROVAÇÃO DE SOBRAL (MANUALMENTE)
@@ -153,6 +159,8 @@ for i, df in enumerate([df_cf_aba1, df_cf_aba2, df_cf_aba3], start=1):
     aprovadas = df[df['Proposta de Referência'].isin(propostas_aprovada)]
     print(f"✅ df_cf_aba{i}: {len(aprovadas)} propostas marcadas como 'Aprovado'.")
 
+
+# %%
 # Lista de propostas a cancelar
 propostas_canceladas = [
     1086978200012025503,    # PE-RECIFE 
@@ -180,12 +188,57 @@ for i, df in enumerate([df_cf_aba1, df_cf_aba2, df_cf_aba3], start=1):
     canceladas = df[df['Proposta de Referência'].isin(propostas_canceladas)]
     print(f"✅ df_cf_aba{i}: {len(canceladas)} propostas marcadas como 'Cancelado'.")
 
+
+# %%
+# Mapeamento CNPJ → CNES
+CNPJ_CNES = {
+    5048983000150: 3151700,
+    85514370000108: 3021238,
+    80906639000170: 4055748,
+    5089379000171: 2415739,
+    1273401000188: 3025020,
+    45184066000117: 3042529,
+    72551799000115: 2080281,
+    9407153000122: 6012302
+}
+
+# DataFrames com CNPJ
+df_com_cnpj = [df_cf_aba1, df_m1_aba1]
+
+# Atualizar CNES apenas onde CNPJ está no dicionário
+for df in df_com_cnpj:
+    df['CNPJ'] = df['CNPJ'].astype(int)
+    df['CNES'] = np.where(
+        df['CNPJ'].isin(CNPJ_CNES),
+        df['CNPJ'].map(CNPJ_CNES),
+        df['CNES']
+    ).astype('object')
+
+# Criar dicionário Proposta → CNES a partir dos DataFrames atualizados
+proposta_cnes_map = pd.concat(df_com_cnpj)[['Proposta de Referência', 'CNES']].dropna()
+proposta_cnes_dict = dict(zip(proposta_cnes_map['Proposta de Referência'], proposta_cnes_map['CNES']))
+
+# DataFrames sem CNPJ
+df_sem_cnpj = [df_cf_aba2, df_cf_aba3, df_m1_aba2, df_m1_aba3]
+
+# Atualizar CNES apenas onde Proposta de Referência está no dicionário
+for df in df_sem_cnpj:
+    df['CNES'] = np.where(
+        df['Proposta de Referência'].isin(proposta_cnes_dict),
+        df['Proposta de Referência'].map(proposta_cnes_dict),
+        df['CNES']
+    ).astype('object')
+
+
+# %%
 # conversão modalidade 1
 
 for i, df in enumerate([df_m1_aba1, df_m1_aba2, df_m1_aba3], start=1):
     # Garante que a coluna esteja no tipo string
     df['Proposta de Referência'] = df['Proposta de Referência'].astype(str)
 
+
+# %%
 # montando a MATRIZ DE OFERTA - CRÉDITO FINANCEIRO - CIRURGIAS
 
 # remover coluna
@@ -193,7 +246,7 @@ df_cf_aba3.drop(columns='TP_COMPLEXIDADE', inplace=True)
 
 
 # colocar coluna 'entidade'
-df_cf_aba3 = df_cf_aba3.merge(    df_cf_aba1[['Proposta de Referência', 'Entidade']],                                   
+df_cf_aba3 = df_cf_aba3.merge(df_cf_aba1[['Proposta de Referência', 'Entidade']],                                   
     on='Proposta de Referência',
     how='left')
 
@@ -221,22 +274,34 @@ df_cf_aba3 = df_cf_aba3[[
     'VL_TOTAL'
 ]]
 
+
+# %%
+df_cf_aba3.info()
+
+# %%
 # montando a MATRIZ DE OFERTA - MODALIDADE 1 - CIRURGIAS
 
-# remover coluna
-df_m1_aba3.drop(columns='TP_COMPLEXIDADE', inplace=True)                                                                
+# remover coluna 'TP_COMPLEXIDADE'
+df_m1_aba3.drop(columns='TP_COMPLEXIDADE', inplace=True)
 
-# colocar coluna 'entidade'
-df_m1_aba3 = df_cf_aba3.merge(df_m1_aba1[['Proposta de Referência', 'Entidade']],                                   
+# remover coluna 'Entidade' existente, se houver
+if 'Entidade' in df_m1_aba3.columns:
+    df_m1_aba3.drop(columns='Entidade', inplace=True)
+
+# colocar coluna 'Entidade' via merge
+df_m1_aba3 = df_m1_aba3.merge(
+    df_m1_aba1[['Proposta de Referência', 'Entidade']],
     on='Proposta de Referência',
-    how='left')
+    how='left'
+)
 
-# alterando nome da colunas
+# renomear colunas
 df_m1_aba3.rename(columns={
-    'Entidade': 'ENTIDADE','TX_COMPLEMENTACAO_MAXIMA': '% COMPLEMENTACAO_MAXIMA'                                        
+    'Entidade': 'ENTIDADE',
+    'TX_COMPLEMENTACAO_MAXIMA': '% COMPLEMENTACAO_MAXIMA'
 }, inplace=True)
 
-# reoganizado as colunas
+# reorganizar colunas
 df_m1_aba3 = df_m1_aba3[[                                                                                               
     'Proposta de Referência',
     'Status da Proposta',
@@ -255,6 +320,11 @@ df_m1_aba3 = df_m1_aba3[[
     'VL_TOTAL'
 ]]
 
+
+# %%
+df_m1_aba3.info()
+
+# %%
 # montando a MATRIZ DE OFERTA - CRÉDITO FINANCEIRO - OCI
 
 # remover coluna
@@ -266,6 +336,7 @@ df_cf_aba2 = df_cf_aba2.merge(df_cf_aba1[['Proposta de Referência', 'Entidade']
     on='Proposta de Referência',
     how='left')
 
+
 # reoganizado as colunas
 df_cf_aba2= df_cf_aba2[[                                                                                 
     'Proposta de Referência',
@@ -273,6 +344,7 @@ df_cf_aba2= df_cf_aba2[[
     'UF',
     'Município',
     'CNES',
+    'Entidade',
     'NU_PROCEDIMENTO',
     'NO_GRUPO',
     'NO_PROCEIDMENTO',
@@ -282,7 +354,11 @@ df_cf_aba2= df_cf_aba2[[
     'VL_TOTAL'
 ]]
 
+
+# %%
 # montando a MATRIZ DE OFERTA - MODALIDADE 1 - OCI
+
+
 
 # Remover colunas desnecessárias
 df_m1_aba2.drop(columns=['TP_SEXO', 'NU_IDADE_MINIMA', 'NU_IDADE_MAXIMA'], inplace=True)
@@ -304,6 +380,7 @@ df_m1_aba2 = df_m1_aba2[[
     'UF',
     'Município',
     'CNES',
+    'Entidade',
     'NU_PROCEDIMENTO',
     'NO_GRUPO',
     'NO_PROCEIDMENTO',
@@ -314,7 +391,10 @@ df_m1_aba2 = df_m1_aba2[[
 ]]
 
 
+
+# %%
 # montando a aba SIMPLIFICADA - CRÉDITO FINANCEIRO 
+
 
 # copiando a informação da df_cf_aba1
 df_simp_cc = df_cf_aba1.copy()
@@ -346,14 +426,20 @@ soma_por_proposta_co.rename(columns={'VL_TOTAL': 'VL_TOTAL_OCI'}, inplace=True)
 # Fazer o merge com df_simp_cc
 df_simp_cc = df_simp_cc.merge(soma_por_proposta_co, on='Proposta de Referência', how='left')
 
+# %%
 # nova coluna de total COMP + OCI
 df_simp_cc['VL_TOTAL_COMP_CIRUGICO'].fillna(0, inplace=True)
 df_simp_cc['VL_TOTAL_OCI'].fillna(0, inplace=True)
 df_simp_cc['VALOR_TOTAL_MES_COMP+OCI'] = df_simp_cc['VL_TOTAL_COMP_CIRUGICO'] + df_simp_cc['VL_TOTAL_OCI']
 df_simp_cc['VALOR_TOTAL_ANO_COMP+OCI']= df_simp_cc['VALOR_TOTAL_MES_COMP+OCI']*12
 
-print(df_m1_aba2.columns)
 
+# %%
+# aba de Cancelado
+df_proposta_cancelada = df_simp_cc[df_simp_cc['Status da Proposta'] == 'Cancelado'].copy()
+
+
+# %%
 # Montando a aba SIMPLIFICADA - MODALIDADE 1
 
 # Copiar os dados da aba 1
@@ -382,15 +468,18 @@ soma_por_proposta_mo.rename(columns={'VL_TOTAL': 'VL_TOTAL_OCI'}, inplace=True)
 # Merge final com df_simp_m1
 df_simp_m1 = df_simp_m1.merge(soma_por_proposta_mo, on='Proposta de Referência', how='left')
 
+
+# %%
 # nova coluna de total COMP + OCI
 df_simp_m1['VL_TOTAL_COMP_CIRUGICO'].fillna(0, inplace=True)
 df_simp_m1['VL_TOTAL_OCI'].fillna(0, inplace=True)
 df_simp_m1['VALOR_TOTAL_MES_COMP+OCI'] = df_simp_m1['VL_TOTAL_COMP_CIRUGICO'] + df_simp_m1['VL_TOTAL_OCI']
 df_simp_m1['VALOR_TOTAL_ANO_COMP+OCI']= df_simp_m1['VALOR_TOTAL_MES_COMP+OCI']*12
 
+# %% [markdown]
+# # TERCEIRA PARTE, Carregar os dataFrame para a tabela MODELO
 
-# TERCEIRA PARTE, Carregar os dataFrame para a tabela MODELO
-
+# %%
 import os
 import pandas as pd
 import openpyxl
@@ -412,18 +501,13 @@ MAPPING = {
     "df_m1_aba2": "M_OFERTA_M1_OCI",
     "df_m1_aba3": "M_OFERTA_M1_CC",
     "df_simp_m1": "SIMP_M1",
+    "df_proposta_cancelada": "CCPP-CANCELAR",
 }
 
 # Função para sobrescrever a aba a partir da linha 3
 def sobrescrever_aba(workbook, aba_nome, df):
     if aba_nome in workbook.sheetnames:
         ws = workbook[aba_nome]
-        # Limpa as linhas existentes a partir da linha 3
-        max_row = ws.max_row
-        for i in range(max_row, 2, -1):
-            ws.delete_rows(i)
-        
-        # Escreve o novo DataFrame a partir da linha 3
         for i, row in enumerate(dataframe_to_rows(df, index=False, header=False), start=3):
             for j, value in enumerate(row, start=1):
                 ws.cell(row=i, column=j, value=value)
@@ -434,7 +518,6 @@ def sobrescrever_aba(workbook, aba_nome, df):
 # Função para carregar os DataFrames (simplesmente acessa variáveis globais)
 def carregar_dados_do_excel(nome_df):
     try:
-        # Acessa as variáveis globais que contêm os DataFrames
         return globals()[nome_df]
     except KeyError:
         print(f"⚠️ DataFrame '{nome_df}' não está definido.")
@@ -480,18 +563,19 @@ else:
     except Exception as e:
         print(f"❌ Erro fatal durante a execução: {e}")
 
-pasta = os.path.expanduser("~") # Usando apenas o diretório home, pois não se tem certeza da estrutura
-downloads_dir = os.path.join(pasta, "Downloads") # Tentando ser mais explícito para a pasta Downloads
 
-# Caminho da pasta Downloads (do sistema)
-pasta_sistema_downloads = os.path.expanduser("~/Downloads")
+# %%
+# Caminho da pasta Downloads
+pasta = os.path.expanduser("~/Downloads")
 
-# Percorre todos os arquivos na pasta de downloads do sistema
-for arquivo in os.listdir(pasta_sistema_downloads):
-    caminho_arquivo = os.path.join(pasta_sistema_downloads, arquivo)
+# Percorre todos os arquivos na pasta
+for arquivo in os.listdir(pasta):
+    caminho_arquivo = os.path.join(pasta, arquivo)
     if os.path.isfile(caminho_arquivo):
         os.remove(caminho_arquivo)
-        
+
+
+# %%
 fim = datetime.now()
 tempo_total = fim - inicio
 
@@ -499,3 +583,5 @@ horas, resto = divmod(tempo_total.total_seconds(), 3600)
 minutos, segundos = divmod(resto, 60)
 
 print(f"✅ Tempo total de execução: {int(horas)}h {int(minutos)}min {int(segundos)}s")
+
+
