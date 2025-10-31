@@ -48,7 +48,8 @@ def enviar_email():
 
         email.HTMLBody = (
             "<p>Prezados,</p>"
-            "<p>Segue em anexo o relatório diário gerado automaticamente.</p>"
+            "<p>Segue em anexo o relatório diário gerado automaticamente."
+            "Temos novidades.. agora com CNES nas proposta que tinha apenas CNPJ... </p>"
             "<p>Atenciosamente,<br>Otavio Augusto - BOT</p>"
             '<img src="cid:assinatura_img">'
         )
